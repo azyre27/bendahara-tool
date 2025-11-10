@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tool Bendahara - Catat Iuran</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+    }
+    footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 16px;
+  margin-top: 30px;
+  font-size: 12px;
+  border-top: 1px solid #334155;
+  background: #0f172a;
+  animation: blink 2.5s infinite ease-in-out;
+}
+
+footer p {
+  margin: 4px 0;
+}
+
+/* Efek kelap-kelip lembut */
+@keyframes blink {
+  0%, 100% { opacity: 0.9; color: #94a3b8; }
+  50% { opacity: 0.5; color: #38bdf8; }
+}
+    .wrap { max-width: 800px; margin: 30px auto; padding: 20px; }
+
+    header { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; }
+
+    .logo img { width: 60px; height: 60px; }
+
+    h1 { font-size: 22px; margin: 0; }
+
+    p.lead { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .card { background: var(--card); padding: 16px; box-shadow: 0 0 0 1px #334155; }
+
+    .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+
+    .controls input[type=text] {
+      padding: 10px 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text);
+      width: 100%;
+    }
+
+    .list { display: flex; flex-direction: column; gap: 10px; }
+
+    .row { display: flex; gap: 10px; align-items: center; background: #1e293b; padding: 10px; box-shadow: 0 0 0 1px #334155; }
+
+    .name { flex: 1; }
+
+    .name-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid #334155;
+    }
+
+    .amount { width: 160px; display: flex; gap: 6px; align-items: center; }
+
+    .amount .btn {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .amount .value { width: 80px; text-align: center; }
+
+    .trash {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      width: 38px;
+      height: 38px;
+      cursor: pointer;
+    }
+
+    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+
+    .send-btn { padding: 10px 16px; background: #25D366; border: none; color: white; cursor: pointer; }
+
+    .summary { color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/2329/2329087.png" alt="icon" />
+      </div>
+      <div>
+        <h1>Tool Bendahara</h1>
+        <p class="lead">buat ngitung duittt</p>
+      </div>
+    </header>
+    <div class="card">
+      <div class="controls">
+        <label for="waNumber">Website By : Melqy Ertawanny</label>
+        <input id="waNumber" type="text" value="6285624582564" />
+      </div>
+
+      <div class="list" id="list"></div>
+
+      <div class="footer">
+        <div class="summary" id="summary">Total: Rp0</div>
+        <button id="sendWA" class="send-btn">Send to WhatsApp</button>
+      </div>
+    </div>
+  </div>
+<footer>
+  <p>© Melqy Gamtenkkk</p>
+  <p>Butuh jasa pembuatan web statis? order di website :</p>
+  <a href="https://ertawanny-profile.vercel.app">Website Saya</a>
+</footer>
+  <script>
+    const listEl = document.getElementById('list');
+    const sendBtn = document.getElementById('sendWA');
+    const waNumberInput = document.getElementById('waNumber');
+    const summaryEl = document.getElementById('summary');
+
+    function formatRp(n) {
+      return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function createRow(name = '', amount = 0) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row._amount = amount;
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'name';
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.className = 'name-input';
+      nameInput.placeholder = 'Name';
+      nameInput.value = name;
+
+      const amountDiv = document.createElement('div');
+      amountDiv.className = 'amount';
+      const minus = document.createElement('button');
+      minus.className = 'btn';
+      minus.textContent = '-';
+      const value = document.createElement('div');
+      value.className = 'value';
+      value.textContent = 'Rp' + formatRp(amount);
+      const plus = document.createElement('button');
+      plus.className = 'btn';
+      plus.textContent = '+';
+
+      const trash = document.createElement('button');
+      trash.className = 'trash';
+      trash.textContent = '🗑️';
+
+      amountDiv.append(minus, value, plus);
+      nameDiv.appendChild(nameInput);
+      row.append(nameDiv, amountDiv, trash);
+      listEl.appendChild(row);
+
+      nameInput.addEventListener('input', () => {
+        const rows = Array.from(listEl.children);
+        if (nameInput.value.trim() !== '' && row === rows[rows.length - 1]) {
+          createRow('', row._amount);
+        }
+      });
+
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const nextInput = row.nextElementSibling?.querySelector('.name-input');
+          if (nextInput) {
+            nextInput.focus();
+          } else {
+            createRow('', row._amount);
+            setTimeout(() => {
+              row.nextElementSibling?.querySelector('.name-input')?.focus();
+            }, 100);
+          }
+        }
+      });
+
+      plus.addEventListener('click', () => {
+        row._amount += 500;
+        value.textContent = 'Rp' + formatRp(row._amount);
+        updateSummary();
+      });
+
+      minus.addEventListener('click', () => {
+        row._amount = Math.max(0, row._amount - 500);
+        value.textContent = 'Rp' + formatRp(row._amount);
+        updateSummary();
+      });
+
+      trash.addEventListener('click', () => {
+        row.remove();
+        updateSummary();
+      });
+
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const rows = Array.from(listEl.children);
+      const total = rows.reduce((acc, r) => acc + (r._amount || 0), 0);
+      summaryEl.textContent = 'Total: Rp' + formatRp(total);
+    }
+
+    sendBtn.addEventListener('click', () => {
+      const wa = waNumberInput.value.trim();
+      if (!wa) return alert('Masukkan nomor WhatsApp tujuan.');
+
+      const rows = Array.from(listEl.children);
+      const now = new Date();
+      const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+      const tanggal = now.getDate();
+      const bulan = now.toLocaleDateString('id-ID', { month: 'long' });
+      const tahun = now.getFullYear();
+
+      let lines = [`*${hari}, ${tanggal} ${bulan} ${tahun}*`, ''];
+
+      rows.forEach((r, i) => {
+        const name = r.querySelector('.name-input').value.trim();
+        if (name) {
+          lines.push(`*${i + 1}᎐* ${name} : Rp${formatRp(r._amount)}`);
+        }
+      });
+
+      const total = rows.reduce((acc, r) => acc + (r._amount || 0), 0);
+      lines.push('', ` Total : \`Rp${formatRp(total)}\``);
+
+      const message = lines.join('\\n');
+      const encoded = encodeURIComponent(message).replace(/%5Cn/g, '%0A');
+      const link = `https://wa.me/${wa}?text=${encoded}`;
+      window.open(link, '_blank');
+    });
+
+    createRow('', 0);
+  </script>
+</body>
+</html>
