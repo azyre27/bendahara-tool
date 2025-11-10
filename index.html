@@ -202,17 +202,23 @@ footer p {
         }
       });
 
-      plus.addEventListener('click', () => {
-        row._amount += 500;
-        value.textContent = 'Rp' + formatRp(row._amount);
-        updateSummary();
-      });
+      plus.addEventListener('click', (e) => {
+  e.preventDefault();
+  const active = document.activeElement;
+  row._amount += 500;
+  value.textContent = 'Rp' + formatRp(row._amount);
+  updateSummary();
+  if (active && active.tagName === 'INPUT') active.focus(); // jaga agar keyboard tetap muncul
+});
 
-      minus.addEventListener('click', () => {
-        row._amount = Math.max(0, row._amount - 500);
-        value.textContent = 'Rp' + formatRp(row._amount);
-        updateSummary();
-      });
+minus.addEventListener('click', (e) => {
+  e.preventDefault();
+  const active = document.activeElement;
+  row._amount = Math.max(0, row._amount - 500);
+  value.textContent = 'Rp' + formatRp(row._amount);
+  updateSummary();
+  if (active && active.tagName === 'INPUT') active.focus(); // tetap fokus di input
+});
 
       trash.addEventListener('click', () => {
         row.remove();
@@ -262,3 +268,4 @@ footer p {
 </body>
 
 </html>
+
