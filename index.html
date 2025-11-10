@@ -22,26 +22,27 @@
       color: var(--text);
       margin: 0;
     }
+
     footer {
-  text-align: center;
-  color: var(--muted);
-  padding: 16px;
-  margin-top: 30px;
-  font-size: 12px;
-  border-top: 1px solid #334155;
-  background: #0f172a;
-  animation: blink 2.5s infinite ease-in-out;
-}
+      text-align: center;
+      color: var(--muted);
+      padding: 16px;
+      margin-top: 30px;
+      font-size: 12px;
+      border-top: 1px solid #334155;
+      background: #0f172a;
+      animation: blink 2.5s infinite ease-in-out;
+    }
 
-footer p {
-  margin: 4px 0;
-}
+    footer p {
+      margin: 4px 0;
+    }
 
-/* Efek kelap-kelip lembut */
-@keyframes blink {
-  0%, 100% { opacity: 0.9; color: #94a3b8; }
-  50% { opacity: 0.5; color: #38bdf8; }
-}
+    @keyframes blink {
+      0%, 100% { opacity: 0.9; color: #94a3b8; }
+      50% { opacity: 0.5; color: #38bdf8; }
+    }
+
     .wrap { max-width: 800px; margin: 30px auto; padding: 20px; }
 
     header { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; }
@@ -131,11 +132,13 @@ footer p {
       </div>
     </div>
   </div>
-<footer>
-  <p>© Melqy Gamtenkkk</p>
-  <p>Butuh jasa pembuatan web statis? order di website :</p>
-  <a href="https://ertawanny-profile.vercel.app">Website Saya</a>
-</footer>
+
+  <footer>
+    <p>© Melqy Gamtenkkk</p>
+    <p>Butuh jasa pembuatan web statis? order di website :</p>
+    <a href="https://ertawanny-profile.vercel.app" target="_blank" style="color:#38bdf8;">Website Saya</a>
+  </footer>
+
   <script>
     const listEl = document.getElementById('list');
     const sendBtn = document.getElementById('sendWA');
@@ -156,7 +159,7 @@ footer p {
       const nameInput = document.createElement('input');
       nameInput.type = 'text';
       nameInput.className = 'name-input';
-      nameInput.placeholder = 'Name';
+      nameInput.placeholder = 'Nama';
       nameInput.value = name;
 
       const amountDiv = document.createElement('div');
@@ -180,45 +183,42 @@ footer p {
       row.append(nameDiv, amountDiv, trash);
       listEl.appendChild(row);
 
+      // Otomatis tambah baris baru bila baris terakhir diisi
       nameInput.addEventListener('input', () => {
         const rows = Array.from(listEl.children);
         if (nameInput.value.trim() !== '' && row === rows[rows.length - 1]) {
           createRow('', row._amount);
         }
+        updateSummary();
       });
 
+      // Enter ke kolom berikutnya
       nameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
           const nextInput = row.nextElementSibling?.querySelector('.name-input');
-          if (nextInput) {
-            nextInput.focus();
-          } else {
-            createRow('', row._amount);
-            setTimeout(() => {
-              row.nextElementSibling?.querySelector('.name-input')?.focus();
-            }, 100);
-          }
+          if (nextInput) nextInput.focus();
         }
       });
 
+      // Tombol tambah dan kurang (keyboard tetap terbuka)
       plus.addEventListener('click', (e) => {
-  e.preventDefault();
-  const active = document.activeElement;
-  row._amount += 500;
-  value.textContent = 'Rp' + formatRp(row._amount);
-  updateSummary();
-  if (active && active.tagName === 'INPUT') active.focus(); // jaga agar keyboard tetap muncul
-});
+        e.preventDefault();
+        const active = document.activeElement;
+        row._amount += 500;
+        value.textContent = 'Rp' + formatRp(row._amount);
+        updateSummary();
+        setTimeout(() => { if (active && active.tagName === 'INPUT') active.focus(); }, 100);
+      });
 
-minus.addEventListener('click', (e) => {
-  e.preventDefault();
-  const active = document.activeElement;
-  row._amount = Math.max(0, row._amount - 500);
-  value.textContent = 'Rp' + formatRp(row._amount);
-  updateSummary();
-  if (active && active.tagName === 'INPUT') active.focus(); // tetap fokus di input
-});
+      minus.addEventListener('click', (e) => {
+        e.preventDefault();
+        const active = document.activeElement;
+        row._amount = Math.max(0, row._amount - 500);
+        value.textContent = 'Rp' + formatRp(row._amount);
+        updateSummary();
+        setTimeout(() => { if (active && active.tagName === 'INPUT') active.focus(); }, 100);
+      });
 
       trash.addEventListener('click', () => {
         row.remove();
@@ -228,12 +228,17 @@ minus.addEventListener('click', (e) => {
       updateSummary();
     }
 
+    // Hanya hitung total dari nama yang diisi
     function updateSummary() {
       const rows = Array.from(listEl.children);
-      const total = rows.reduce((acc, r) => acc + (r._amount || 0), 0);
+      const total = rows.reduce((acc, r) => {
+        const name = r.querySelector('.name-input').value.trim();
+        return name ? acc + (r._amount || 0) : acc;
+      }, 0);
       summaryEl.textContent = 'Total: Rp' + formatRp(total);
     }
 
+    // Kirim ke WhatsApp
     sendBtn.addEventListener('click', () => {
       const wa = waNumberInput.value.trim();
       if (!wa) return alert('Masukkan nomor WhatsApp tujuan.');
@@ -245,20 +250,26 @@ minus.addEventListener('click', (e) => {
       const bulan = now.toLocaleDateString('id-ID', { month: 'long' });
       const tahun = now.getFullYear();
 
-      let lines = [`*${hari}, ${tanggal} ${bulan} ${tahun}*`, ''];
+      let lines = [`(${hari}, ${tanggal} ${bulan} ${tahun})`, ''];
 
-      rows.forEach((r, i) => {
+      let count = 1;
+      rows.forEach((r) => {
         const name = r.querySelector('.name-input').value.trim();
         if (name) {
-          lines.push(`*${i + 1}᎐* ${name} : Rp${formatRp(r._amount)}`);
+          lines.push(`${count}. ${name} : *Rp${formatRp(r._amount)}*`);
+          count++;
         }
       });
 
-      const total = rows.reduce((acc, r) => acc + (r._amount || 0), 0);
-      lines.push('', ` Total : \`Rp${formatRp(total)}\``);
+      const total = rows.reduce((acc, r) => {
+        const name = r.querySelector('.name-input').value.trim();
+        return name ? acc + (r._amount || 0) : acc;
+      }, 0);
 
-      const message = lines.join('\\n');
-      const encoded = encodeURIComponent(message).replace(/%5Cn/g, '%0A');
+      lines.push('', `[ (Total Rp${formatRp(total)}) ]`);
+
+      const message = lines.join('\n');
+      const encoded = encodeURIComponent(message);
       const link = `https://wa.me/${wa}?text=${encoded}`;
       window.open(link, '_blank');
     });
@@ -266,6 +277,4 @@ minus.addEventListener('click', (e) => {
     createRow('', 0);
   </script>
 </body>
-
 </html>
-
